@@ -114,25 +114,25 @@ trait SoftCascadeDelete {
      *
      * @return void
      */
-	public static function bootDeleteRelations() {
+	// public static function bootDeleteRelations() {
 
-		$self = new self;
+	// 	$self = new self;
 
-		if ( ! $self->initDelatebaleRelations() ) { return; }
+	// 	if ( ! $self->initDelatebaleRelations() ) { return; }
 
-		static::{$self->deleteEvent}(function ($model) use ($self) {
+	// 	static::{$self->deleteEvent}(function ($model) use ($self) {
 
-			// if model is force deleting and at model configuration onforceDelete set to true
-			if ( $model->isForceDeleting() && $self->forceDeleteOnModelForceDelete ) {
+	// 		// if model is force deleting and at model configuration onforceDelete set to true
+	// 		if ( $model->isForceDeleting() && $self->forceDeleteOnModelForceDelete ) {
 
-				$self->deleteMethod = 'forceDelete';
-			}
+	// 			$self->deleteMethod = 'forceDelete';
+	// 		}
 
-			$self->deleteModelRelations($self->deleteRelations, $self->deleteMethod, $model);
+	// 		$self->deleteModelRelations($self->deleteRelations, $self->deleteMethod, $model);
 
-		});
+	// 	});
 
-	}
+	// }
 
 
 	/**

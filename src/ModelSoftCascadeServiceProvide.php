@@ -14,7 +14,7 @@ class ModelSoftCascadeServiceProvide extends ServiceProvider {
     public function boot() {
 
         $this->publishes([
-            __DIR__.'/../config/soft-cascade.php' => base_path('config/hasher.php'),
+            __DIR__.'/../config/soft-cascade.php' => base_path('config/soft-cascade.php'),
         ], 'config');
     }
     
@@ -27,7 +27,7 @@ class ModelSoftCascadeServiceProvide extends ServiceProvider {
     public function register() {
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/hasher.php', 'hasher'
+            __DIR__.'/../config/soft-cascade.php', 'soft-cascade'
         );
     }
     

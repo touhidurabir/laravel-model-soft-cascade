@@ -70,18 +70,18 @@ trait SoftCascadeRestore {
      *
      * @return void
      */
-	public static function bootRestoreRelations() {
+	// public static function bootRestoreRelations() {
 
-		$self = new self;
+	// 	$self = new self;
 
-		if ( ! $self->initRestorableRelations() ) { return; }
+	// 	if ( ! $self->initRestorableRelations() ) { return; }
 
-		static::{$self->restoreEvent}(function ($model) use ($self) {
+	// 	static::{$self->restoreEvent}(function ($model) use ($self) {
 
-			$self->restoreModelRelations($self->restoreRelations, $model);
+	// 		$self->restoreModelRelations($self->restoreRelations, $model);
 			
-		});
-	}
+	// 	});
+	// }
 
 
 	/**

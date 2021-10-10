@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateUsersTable extends Migration
+class CreatePostsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        DB::connection()->getSchemaBuilder()->create('users', function (Blueprint $table) {
+        DB::connection()->getSchemaBuilder()->create('posts', function (Blueprint $table) {
             $table->increments('id');
             $table->bigInteger('user_id')->unsigned();
             $table->string('title');
@@ -31,6 +31,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        DB::connection()->getSchemaBuilder()->dropIfExists('users');
+        DB::connection()->getSchemaBuilder()->dropIfExists('posts');
     }
 }

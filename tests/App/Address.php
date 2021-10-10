@@ -6,23 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
-class Profile extends Model {
+class Address extends Model {
 
     use SoftDeletes;
 
     use HasSoftCascade;
-
-    public function cascadable() {
-
-        return [];
-    }
 
     /**
      * The model associated table
      *
      * @var string
      */
-    protected $table = 'profiles';
+    protected $table = 'addresses';
 
 
     /**
@@ -34,7 +29,7 @@ class Profile extends Model {
 
 
     /**
-     * Get the user that owns the profile.
+     * Get the user that owns this address.
      *
      * @return object
      */
@@ -42,5 +37,4 @@ class Profile extends Model {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\User');
     }
-
 }

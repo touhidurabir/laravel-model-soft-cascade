@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
-class Profile extends Model {
+class Comment extends Model {
 
     use SoftDeletes;
 
@@ -22,7 +22,7 @@ class Profile extends Model {
      *
      * @var string
      */
-    protected $table = 'profiles';
+    protected $table = 'comments';
 
 
     /**
@@ -34,13 +34,24 @@ class Profile extends Model {
 
 
     /**
-     * Get the user that owns the profile.
+     * Get the user that owns the comment.
      *
      * @return object
      */
     public function user() {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\User');
+    }
+
+
+    /**
+     * Get the post that owns the comment.
+     *
+     * @return object
+     */
+    public function post() {
+
+        return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\Post');
     }
 
 }

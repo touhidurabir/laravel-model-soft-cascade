@@ -33,7 +33,7 @@ trait HasSoftCascade {
 
             $self->initDelatebaleRelations();
 
-            if ( ! $self->runCascadeDelete ) {
+            if ( ! $self->shouldRunCascade('delete') ) {
 
                 return;
             }
@@ -53,7 +53,7 @@ trait HasSoftCascade {
 
             $self->initRestorableRelations();
 
-            if ( ! $self->runCascadeRestore ) {
+            if ( ! $self->shouldRunCascade('restore') ) {
 
                 return;
             }
@@ -74,6 +74,19 @@ trait HasSoftCascade {
         $this->restoreEvent = $configs['restore']['event']  ?? config('soft-cascade.events.restore') ?? 'restoring';
 
         $this->runAsDatabaseTransaction = config('soft-cascade.on_database_transaction') ?? true;
+    }
+
+
+    protected function shouldRunCascade(string $action) {
+
+        $actionBasedShouldRunProperty = 'runCascade' . ucfirst(strtolower($action));
+
+        if ( ! property_exists($this, $actionBasedShouldRunProperty) ) {
+
+            return true;
+        }
+
+        return $this->{$actionBasedShouldRunProperty};
     }
 
 }

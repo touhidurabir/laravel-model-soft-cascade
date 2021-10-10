@@ -2,12 +2,12 @@
 
 namespace Touhidurabir\ModelSoftCascade;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Touhidurabir\ModelSoftCascade\Concerns\CascadeValidation;
 use Touhidurabir\ModelSoftCascade\Concerns\SoftCascadeDelete;
 use Touhidurabir\ModelSoftCascade\Concerns\SoftCascadeRestore;
-use Touhidurabir\ModelSoftCascade\Exceptions\SoftCascadeException;
 
 trait HasSoftCascade {
 
@@ -17,7 +17,9 @@ trait HasSoftCascade {
 
     use SoftCascadeDelete, SoftCascadeRestore;
 
-    abstract public function cascade() : array;
+    use CascadeValidation;
+
+    abstract public function cascadable() : array;
 
     public static function bootHasSoftCascade() {
 
@@ -25,7 +27,18 @@ trait HasSoftCascade {
 
 		$self->initializeHasSoftCascade();
 
+        $self->validateActionEvent();
+
 		static::{$self->deleteEvent}(function ($model) use ($self) {
+
+            $self->initDelatebaleRelations();
+
+            if ( ! $self->runCascadeDelete ) {
+
+                return;
+            }
+
+            $self->validateCascading(['delete']);
 
 			// if model is force deleting and at model configuration onforceDelete set to true
 			if ( $model->isForceDeleting() && $self->forceDeleteOnModelForceDelete ) {
@@ -33,12 +46,21 @@ trait HasSoftCascade {
 				$self->deleteMethod = 'forceDelete';
 			}
 
-			$self->deleteModelRelations($self->deleteRelations, $self->deleteMethod, $model);
+			$self->deleteModelRelations($self->relationships, $self->deleteMethod, $model);
 		});
 
         static::{$self->restoreEvent}(function ($model) use ($self) {
 
-			$self->restoreModelRelations($self->restoreRelations, $model);
+            $self->initRestorableRelations();
+
+            if ( ! $self->runCascadeRestore ) {
+
+                return;
+            }
+
+            $self->validateCascading(['restore']);
+
+			$self->restoreModelRelations($self->relationships, $model);
 			
 		});
     }
@@ -46,59 +68,12 @@ trait HasSoftCascade {
 
     public function initializeHasSoftCascade() {
 
-        
-    }
+        $configs = $this->cascadable();
 
+        $this->deleteEvent  = $configs['delete']['event']   ?? config('soft-cascade.events.delete')  ?? 'deleting';
+        $this->restoreEvent = $configs['restore']['event']  ?? config('soft-cascade.events.restore') ?? 'restoring';
 
-    /**
-     * Validate that the calling model is correctly setup for cascading behaviours.
-     *
-     * @return void
-     * 
-     * @throws \Touhidurabir\ModelSoftCascade\Exceptions\SoftCascadeException
-     */
-    protected function validateCascadingSoftDelete() {
-
-        if ( ! $this->hasSoftDeletes() ) {
-
-            throw SoftCascadeException::softDeleteNotImplementedOnModel(get_class($this));
-        }
-
-        if ( $invalidCascadingRelationships = $this->hasInvalidRelationships($this->relationships) ) {
-            
-            throw SoftCascadeException::relationNotDefined(
-                get_class($this),
-                $invalidCascadingRelationships
-            );
-        }
-    }
-
-
-    /**
-     * Determine if the current model has soft deletes trait define/use it.
-     *
-     * @return bool
-     */
-    protected function hasSoftDeletes() {
-
-        return method_exists($this, 'runSoftDelete');
-    }
-
-
-    /**
-     * Determine if the current model has any invalid cascading relationships defined.
-     *
-     * A relationship is considered invalid when the method does not exist, or the relationship
-     * method does not return an instance of Illuminate\Database\Eloquent\Relations\Relation.
-     *
-     * @param  array $relationships
-     * @return array
-     */
-    protected function hasInvalidRelationships(array $relationships = []) {
-
-        return array_filter($relationships, function ($relationship) {
-            return ! method_exists($this, $relationship) || ! $this->{$relationship}() instanceof Relation;
-        });
+        $this->runAsDatabaseTransaction = config('soft-cascade.on_database_transaction') ?? true;
     }
 
 }

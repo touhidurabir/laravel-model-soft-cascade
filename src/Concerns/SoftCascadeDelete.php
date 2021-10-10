@@ -2,28 +2,14 @@
 
 namespace Touhidurabir\ModelSoftCascade\Concerns;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 
 trait SoftCascadeDelete {
 
-    
-    /**
-     * List of valid relation delete methods
-     *
-     * @var array
-     */
-	private $validDeleteMethod = ['delete', 'forceDelete'];
-
-
-	/**
-     * List of allowed events on which the DeleteRelations bootable trait can run
-     *
-     * @var array
-     */
-	private $allowedDeleteEvents = ['deleted', 'deleting'];
-
+	protected $runCascadeDelete = true;
 
 	/**
      * Default relation delete method
@@ -47,14 +33,6 @@ trait SoftCascadeDelete {
      * @var bool
      */
 	protected $forceDeleteOnModelForceDelete = false;
-
-
-	/**
-     * List of the relations to be deleted
-     *
-     * @var array
-     */
-	protected $deleteRelations = [];
 	
 
 	/**
@@ -64,75 +42,14 @@ trait SoftCascadeDelete {
      */
 	private function initDelatebaleRelations() {
 
-		if ( method_exists($this, 'deletableRelations') ) {
+		$configs = $this->cascadable();
 
-			$configs = $this->deletableRelations();
+		$this->runCascadeDelete = $config['delete']['enable'] ?? true;
 
-			if ( is_array($configs) ) {
+		$this->relationships = Arr::wrap($config['delete']['relations'] ?? $configs);
 
-				$this->deleteEvent = isset($configs['event']) && 
-									 in_array($configs['event'], $this->allowedDeleteEvents)
-									 	? $configs['event']
-									 	: $this->deleteEvent;
-
-				$this->deleteMethod = $this->validateDeleteMethod($configs['method'] ?? NULL);
-
-				$this->forceDeleteOnModelForceDelete = (bool)($configs['onforceDelete'] ?? NULL);
-
-				$relations = $configs['relations'] ?? NULL;
-				
-				if ( is_array($relations) && !empty($relations) ) {
-
-					$this->deleteRelations = $relations;
-
-					return true;
-				}
-			}
-		}
-
-		return false;
+		$this->forceDeleteOnModelForceDelete = $config['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
 	}
-
-
-	/**
-     * validate the relation delete method
-     *
-     * @param  string $method
-     * @return void
-     */
-	protected function validateDeleteMethod($method) {
-
-		return
-			in_array($method, $this->validDeleteMethod)
-				? $method
-				: $this->deleteMethod;
-	}
-
-
-	/**
-     * Delete model relations on Model delete
-     *
-     * @return void
-     */
-	// public static function bootDeleteRelations() {
-
-	// 	$self = new self;
-
-	// 	if ( ! $self->initDelatebaleRelations() ) { return; }
-
-	// 	static::{$self->deleteEvent}(function ($model) use ($self) {
-
-	// 		// if model is force deleting and at model configuration onforceDelete set to true
-	// 		if ( $model->isForceDeleting() && $self->forceDeleteOnModelForceDelete ) {
-
-	// 			$self->deleteMethod = 'forceDelete';
-	// 		}
-
-	// 		$self->deleteModelRelations($self->deleteRelations, $self->deleteMethod, $model);
-
-	// 	});
-
-	// }
 
 
 	/**
@@ -148,7 +65,10 @@ trait SoftCascadeDelete {
 
 		$model = $model ?? $this;
 
-		DB::beginTransaction();
+		if ( $this->runAsDatabaseTransaction ) {
+
+			DB::beginTransaction();
+		}
 
 		foreach ($relations as $deleteRelation) {
 
@@ -168,12 +88,18 @@ trait SoftCascadeDelete {
 
 					continue;
 				} 
-				
-				! ($modelRels instanceof Model) ?: $modelRels->{$deleteMethod}();
+
+				if ( $modelRels instanceof Model ) {
+
+					$modelRels->{$deleteMethod}();
+				}
 			}
 		}
 
-		DB::commit();
+		if ( $this->runAsDatabaseTransaction ) {
+			
+			DB::commit();
+		}
 
 		return $model;
 	}

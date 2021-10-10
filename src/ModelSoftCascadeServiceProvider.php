@@ -4,7 +4,7 @@ namespace Touhidurabir\ModelSoftCascade;
 
 use Illuminate\Support\ServiceProvider;
 
-class ModelSoftCascadeServiceProvide extends ServiceProvider {
+class ModelSoftCascadeServiceProvider extends ServiceProvider {
     
     /**
      * Bootstrap any application services.

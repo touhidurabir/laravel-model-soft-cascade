@@ -3,11 +3,11 @@
 namespace Touhidurabir\ModelSoftCascade\Tests;
 
 use Orchestra\Testbench\TestCase;
-use Touhidurabir\ModelHashid\Tests\App\User;
-use Touhidurabir\ModelHashid\Tests\App\Post;
-use Touhidurabir\ModelHashid\Tests\App\Profile;
-use Touhidurabir\ModelHashid\Tests\App\Comment;
-use Touhidurabir\ModelHashid\Tests\App\Address;
+use Touhidurabir\ModelSoftCascade\Tests\App\User;
+use Touhidurabir\ModelSoftCascade\Tests\App\Post;
+use Touhidurabir\ModelSoftCascade\Tests\App\Profile;
+use Touhidurabir\ModelSoftCascade\Tests\App\Comment;
+use Touhidurabir\ModelSoftCascade\Tests\App\Address;
 use Touhidurabir\ModelSoftCascade\Tests\Traits\LaravelTestBootstrapping;
 
 class SoftCascadeTest extends TestCase {
@@ -31,4 +31,21 @@ class SoftCascadeTest extends TestCase {
     }
 
     
+    /**
+     * @test
+     */
+    public function it_cascade_delete() {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+
+        $user->delete();
+
+        $this->assertNull(User::find($user->id));
+        $this->assertNull(Profile::find($profile->id));
+
+        $this->assertIsObject(User::withTrashed()->find($user->id));
+        $this->assertIsObject(Profile::withTrashed()->find($profile->id));
+    }
+
 }

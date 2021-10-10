@@ -12,6 +12,11 @@ class Address extends Model {
 
     use HasSoftCascade;
 
+    public function cascadable() : array  {
+
+        return [];
+    }
+
     /**
      * The model associated table
      *

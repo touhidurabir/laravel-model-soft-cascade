@@ -5,7 +5,7 @@ namespace Touhidurabir\ModelSoftCascade\Exceptions;
 use Exception;
 use Illuminate\Support\Str;
 
-class SoftCascadeException extends Exceptions {
+class SoftCascadeException extends Exception {
 
     public static function softDeleteNotImplementedOnModel(string $modelClass) {
 

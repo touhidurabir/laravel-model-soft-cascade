@@ -4,18 +4,10 @@ namespace Touhidurabir\ModelSoftCascade\Tests\App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
 class Profile extends Model {
 
     use SoftDeletes;
-
-    use HasSoftCascade;
-
-    public function cascadable() {
-
-        return [];
-    }
 
     /**
      * The model associated table

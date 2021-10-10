@@ -12,9 +12,11 @@ class User extends Model {
 
     use HasSoftCascade;
 
-    public function cascadable() {
+    public function cascadable() : array {
 
-        return [];
+        return [
+            'profile', 'posts'
+        ];
     }
 
     /**

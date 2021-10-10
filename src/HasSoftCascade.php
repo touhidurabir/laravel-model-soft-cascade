@@ -11,16 +11,39 @@ use Touhidurabir\ModelSoftCascade\Concerns\SoftCascadeRestore;
 
 trait HasSoftCascade {
 
-    protected $relationships = [];
-
-    protected $runAsDatabaseTransaction = true;
-
     use SoftCascadeDelete, SoftCascadeRestore;
 
     use CascadeValidation;
 
+    /**
+     * The action[delete,restore] specific cascadable relations
+     *
+     * @var array
+     */
+    protected $relationships = [];
+
+
+    /**
+     * Should run the cascading action as transactionla DB action
+     *
+     * @var bool
+     */
+    protected $runAsDatabaseTransaction = true;
+
+
+    /**
+     * The abstract cascade configuration method
+     *
+     * @return array
+     */
     abstract public function cascadable() : array;
 
+
+    /** 
+     * Run cascading action[delete, restore]
+     *
+     * @return void
+     */
     public static function bootHasSoftCascade() {
 
         $self = new self;
@@ -66,6 +89,11 @@ trait HasSoftCascade {
     }
 
 
+    /** 
+     * Init/Set cascading action[delete, restore] specific configurations
+     *
+     * @return void
+     */
     public function initializeHasSoftCascade() {
 
         $configs = $this->cascadable();
@@ -77,6 +105,11 @@ trait HasSoftCascade {
     }
 
 
+    /** 
+     * Should run relation cascading for specific action[delete, restore]
+     *
+     * @return void
+     */
     protected function shouldRunCascade(string $action) {
 
         $actionBasedShouldRunProperty = 'runCascade' . ucfirst(strtolower($action));

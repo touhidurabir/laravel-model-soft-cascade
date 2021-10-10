@@ -33,10 +33,7 @@
         "laravel": {
             "providers": [
                 "Touhidurabir\\ModelSoftCascade\\ModelSoftCascadeServiceProvider"
-            ],
-            "aliases": {
-                "ModelUuid": "Touhidurabir\\ModelSoftCascade\\Facades\\ModelSoftCascade"
-            }
+            ]
         }
     }
 }

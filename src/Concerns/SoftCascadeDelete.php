@@ -9,7 +9,13 @@ use Illuminate\Database\Eloquent\Collection;
 
 trait SoftCascadeDelete {
 
+	/**
+     * Define should run cascade delete on relations
+     *
+     * @var bool
+     */
 	protected $runCascadeDelete = true;
+
 
 	/**
      * Default relation delete method

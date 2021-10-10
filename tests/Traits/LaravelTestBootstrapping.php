@@ -2,7 +2,6 @@
 
 namespace Touhidurabir\ModelSoftCascade\Tests\Traits;
 
-use Touhidurabir\ModelSoftCascade\Facades\ModelSoftCascade;
 use Touhidurabir\ModelSoftCascade\ModelSoftCascadeServiceProvider;
 
 trait LaravelTestBootstrapping {
@@ -19,20 +18,6 @@ trait LaravelTestBootstrapping {
             ModelSoftCascadeServiceProvider::class,
         ];
     }   
-    
-    
-    /**
-     * Override application aliases.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return array
-     */
-    protected function getPackageAliases($app) {
-        
-        return [
-            'ModelSoftCascade' => ModelSoftCascade::class,
-        ];
-    }
 
 
     /**

@@ -7,6 +7,12 @@ use Illuminate\Support\Str;
 
 class SoftCascadeException extends Exception {
 
+    /**
+     * Model has not use the SoftDelete trait
+     *
+     * @param  string $modelClass
+     * @return object<\Exception>
+     */
     public static function softDeleteNotImplementedOnModel(string $modelClass) {
 
         return new static(
@@ -18,6 +24,14 @@ class SoftCascadeException extends Exception {
     }
 
     
+    /**
+     * Invalid model realtion defined for cascading
+     *
+     * @param  string $modelClass
+     * @param  array  $invalidRelations
+     * 
+     * @return object<\Exception>
+     */
     public static function invalidRelationDefined(string $modelClass, array $invalidRelations) {
 
         return new static(
@@ -30,7 +44,16 @@ class SoftCascadeException extends Exception {
         );
     }
 
-    public static function relationNotDefined(string $modelClass, $targetAction = ['restore', 'delete']) {
+
+    /**
+     * Cascading relation not defined
+     *
+     * @param  string $modelClass
+     * @param  array  $targetAction
+     * 
+     * @return object<\Exception>
+     */
+    public static function relationNotDefined(string $modelClass, array $targetAction = ['restore', 'delete']) {
 
         return new static(
             sprintf(
@@ -42,7 +65,16 @@ class SoftCascadeException extends Exception {
     }
 
 
-    public static function invalidActionEvent(string $action, $givenEventName, $allowedEvents) {
+    /**
+     * Cascading action[delete, restore] associated invoking event is invalid
+     *
+     * @param  string $action
+     * @param  string $givenEventName
+     * @param  array  $allowedEvents
+     * 
+     * @return object<\Exception>
+     */
+    public static function invalidActionEvent(string $action, string $givenEventName, array $allowedEvents) {
 
         return new static(
             sprintf(
@@ -53,4 +85,5 @@ class SoftCascadeException extends Exception {
             )
         );
     }
+    
 }

@@ -9,7 +9,13 @@ use Illuminate\Database\Eloquent\Collection;
 
 trait SoftCascadeRestore {
 
+	/**
+     * Define should run cascade restore on relations
+     *
+     * @var bool
+     */
 	protected $runCascadeRestore = true;
+
 
 	/**
      * Default event on which the RestoreRelations bootable trait will run

@@ -48,4 +48,21 @@ class SoftCascadeTest extends TestCase {
         $this->assertIsObject(Profile::withTrashed()->find($profile->id));
     }
 
+
+    /**
+     * @test
+     */
+    public function it_cascade_restore() {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+
+        $user->delete();
+        $user->refresh();
+        $user->restore();
+
+        $this->assertIsObject(User::find($user->id));
+        $this->assertIsObject(Profile::find($profile->id));
+    }
+
 }

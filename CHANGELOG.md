@@ -3,6 +3,5 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
-## [1.0.0] - 2021-08-29
+## [1.0.0] - 2021-90-13
 - Initial release

@@ -10,12 +10,12 @@ class Address extends Model {
 
     use SoftDeletes;
 
-    use HasSoftCascade;
+    // use HasSoftCascade;
 
-    public function cascadable() : array  {
+    // public function cascadable() : array  {
 
-        return [];
-    }
+    //     return [];
+    // }
 
     /**
      * The model associated table

@@ -12,10 +12,27 @@ class Post extends Model {
 
     use HasSoftCascade;
 
+
+    /**
+     * The cascade custom configurations
+     *
+     * @return array
+     */
     public function cascadable() : array  {
 
-        return [];
+        return [
+            'delete' => [
+                'event'     => 'deleted',
+                'relations' => ['comments'],
+                'force'     => true,
+            ],
+            'restore' => [
+                'event'     => 'restored',
+                'relations' => ['comments'],
+            ]
+        ];
     }
+    
 
     /**
      * The model associated table

@@ -50,11 +50,11 @@ trait SoftCascadeDelete {
 
 		$configs = $this->cascadable();
 
-		$this->runCascadeDelete = $config['delete']['enable'] ?? true;
+		$this->runCascadeDelete = $configs['delete']['enable'] ?? true;
 
-		$this->relationships = Arr::wrap($config['delete']['relations'] ?? $configs);
+		$this->relationships = Arr::wrap($configs['delete']['relations'] ?? $configs);
 
-		$this->forceDeleteOnModelForceDelete = $config['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
+		$this->forceDeleteOnModelForceDelete = $configs['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
 	}
 
 

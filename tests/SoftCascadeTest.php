@@ -65,4 +65,48 @@ class SoftCascadeTest extends TestCase {
         $this->assertIsObject(Profile::find($profile->id));
     }
 
+
+    /**
+     * @test
+     */
+    public function it_cascade_force_delete_on_parent_force_delete() {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $post = $user->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        $user->forceDelete();
+
+        $this->assertNull(User::withTrashed()->find($user->id));
+        $this->assertNull(Profile::withTrashed()->find($profile->id));
+        $this->assertNull(Post::withTrashed()->find($post->id));
+    }
+
+
+    /**
+     * @test
+     */
+    public function it_works_on_chain_cascading() {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $post = $user->posts()->create(['title' => 'post title', 'body' => 'post body']);
+        $comment = $post->comments()->create(['user_id' => $user->id, 'comment' => 'post comment']);
+
+        $user->delete();
+
+        $this->assertNull(User::find($user->id));
+        $this->assertNull(Post::find($post->id));
+        $this->assertNull(Comment::find($comment->id));
+
+        $this->assertIsObject(User::withTrashed()->find($user->id));
+        $this->assertIsObject(Post::withTrashed()->find($post->id));
+        $this->assertIsObject(Comment::withTrashed()->find($comment->id));
+
+        $user->restore();
+
+        $this->assertNotNull(User::find($user->id));
+        $this->assertNotNull(Post::find($post->id));
+        $this->assertNotNull(Comment::find($comment->id));
+    }
+
 }

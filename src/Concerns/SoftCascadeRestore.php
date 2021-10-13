@@ -34,9 +34,9 @@ trait SoftCascadeRestore {
 
 		$configs = $this->cascadable();
 
-		$this->runCascadeRestore = $config['restore']['enable'] ?? true;
+		$this->runCascadeRestore = $configs['restore']['enable'] ?? true;
 
-		$this->relationships = Arr::wrap($config['restore']['relations'] ?? $configs);
+		$this->relationships = Arr::wrap($configs['restore']['relations'] ?? $configs);
 	}
 
 

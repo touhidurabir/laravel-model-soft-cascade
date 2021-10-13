@@ -10,13 +10,6 @@ class Comment extends Model {
 
     use SoftDeletes;
 
-    use HasSoftCascade;
-
-    public function cascadable() : array  {
-
-        return [];
-    }
-
     /**
      * The model associated table
      *

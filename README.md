@@ -17,9 +17,13 @@ To publish the config file:
 php artisan vendor:publish --provider="Touhidurabir\ModelSoftCascade\ModelSoftCascadeServiceProvider" --tag=config
 ```
 
-## Usage
+## Configurations
 
 The config file **soft-cascade** file contains most of the basic configurations details like for which delete or restore event, it will invoke the cascading functionality, should the cascading run as database transactional operation, how it will behave when models get force deleted etc . For full details check the config file .
+
+> Note that eveen though these configurations are set as global for all models, it is possible to oberride them for model specific way . Check the Usage section to know how to have specific configurations for specific model while maintaining the global configurations.
+
+## Usage
 
 To use this, simply use the trait **HasSoftCascade** in model and implement the abstract method **cascadable** which will return an **array** . 
 

@@ -104,6 +104,40 @@ public function cascadable() : array  {
 }
 ```
 
+## Cascade Restore only those deleted by cascade delete
+Normally, when running a cascade restore after a cascade delete, all child models would be restored, regardless if they were in trashed state prior to the cascade delete.  This patch fixes that.  
+
+### Configurations Added
+There are 2 configurations added to the config:
+
+- enable_mapping_child_delete_to_parent_delete (boolean, default: true)
+  - enable/disable this feature
+- model_delete_mapping_col (string, default: deletedByCascade)
+  - the column name in each model table used for mapping
+
+### Migrations required
+Basically, each model that has the below trait will need a column added.   
+```php
+use HasSoftCascade;
+```
+Your migration should add this to each model:
+```php
+$table->boolean(config('soft-cascade.model_delete_mapping_col'))
+      ->default(false);
+```
+
+Also add the column name to each of the model $fillable property, like so:
+```php
+    protected $fillable = [
+        'album_id',
+        'deletedByCascade'
+    ];
+```
+
+However, there is a caveat.  There's always going to be that model that is last in the cascade.  This model won't have the trait HasSoftCascade in the model, however, should be using SoftDelete trait.  This final model needs the column in the database table as well.  
+
+See the example models in the ***example-models*** folder
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 

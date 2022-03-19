@@ -61,4 +61,29 @@ return [
     |
     */
 	'force_delete_on_model_force_delete' => true,
+
+	/*
+    |-----------------------------------------------------------------------------
+    | Should cascade delete keep track of cascaded models deleted at time of parent delete
+    |-----------------------------------------------------------------------------
+    | If a model alredy has child records soft deleted and that model is deleted via this package,
+    | then all child models will be sodt deleted with no true method to determine, during restore, 
+    | if the child was part of parent soft delete or not.  Enabling this config and adding column to any/all
+    | child models will solve this issue.
+    |
+    */
+	'enable_mapping_child_delete_to_parent_delete' => true,	
+	
+	/*
+    |-----------------------------------------------------------------------------
+    | Column in model to map child delete to parent delete
+    |-----------------------------------------------------------------------------
+    | If enable_mapping_child_delete_to_parent_delete is true, this column needs to be
+    | in the model as defined below in a migration
+    |
+    |
+    |   $table->softDeletes();
+    |   $table->boolean('deletedByCascade')->default(false);
+    */
+	'model_delete_mapping_col' => 'deletedByCascade',	
 ];

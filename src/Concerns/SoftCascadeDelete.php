@@ -88,6 +88,9 @@ trait SoftCascadeDelete {
 
 						if ( $modelRel instanceof Model ) {
 
+							if ($this->mapCascadedParentDeleteToChildDelete) {
+								$modelRel->update([$this->mapModelCol => true]);
+							}
 							$modelRel->{$deleteMethod}();	
 						}
 					}
@@ -97,6 +100,9 @@ trait SoftCascadeDelete {
 
 				if ( $modelRels instanceof Model ) {
 
+					if ($this->mapCascadedParentDeleteToChildDelete) {
+						$modelRels->update([$this->mapModelCol => true]);
+					}
 					$modelRels->{$deleteMethod}();
 				}
 			}

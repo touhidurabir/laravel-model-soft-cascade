@@ -30,6 +30,20 @@ trait HasSoftCascade {
      */
     protected $runAsDatabaseTransaction = true;
 
+    /**
+     * Should map the child delete as deleted by cascade
+     *
+     * @var bool
+     */
+    protected $mapCascadedParentDeleteToChildDelete = true;
+
+    /**
+     * The column in the model table used for mapping if 
+     * $this->mapCascadedParentDeleteToChildDelete = true
+     *
+     * @var string
+     */
+    protected $mapModelCol = 'deletedByCascade';
 
     /**
      * The abstract cascade configuration method
@@ -102,6 +116,8 @@ trait HasSoftCascade {
         $this->restoreEvent = $configs['restore']['event']  ?? config('soft-cascade.events.restore') ?? 'restoring';
 
         $this->runAsDatabaseTransaction = config('soft-cascade.on_database_transaction') ?? true;
+        $this->mapCascadedParentDeleteToChildDelete = config('enable_mapping_child_delete_to_parent_delete') ?? true;
+        $this->mapModelCol = config('model_delete_mapping_col') ?? 'deletedByCascade';
     }
 
 

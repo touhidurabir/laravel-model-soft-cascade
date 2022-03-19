@@ -65,7 +65,15 @@ trait SoftCascadeRestore {
 
 				foreach ($modelRels as $modelRel) {
 					
-					! ($modelRel instanceof Model) ?: $modelRel->restore();
+					if ($this->mapCascadedParentDeleteToChildDelete) {
+						!($modelRel instanceof Model) ?: $isUpdatedByCascade = $modelRel->getAttribute($this->mapModelCol);
+						if ($isUpdatedByCascade) {
+							!($modelRel instanceof Model) ?: $modelRel->restore();
+							!($modelRel instanceof Model) ?: $modelRel->update([$this->mapModelCol => false]);
+						}
+					} else {
+						!($modelRel instanceof Model) ?: $modelRel->restore();
+					}
 				}
 				
 				// $model->{$restoreRelation}()->withTrashed()->restore();

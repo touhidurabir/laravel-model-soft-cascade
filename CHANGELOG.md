@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+
+## [1.0.0] - 2021-10-13
+- Initial release
+
+## [1.0.1] - 2021-10-14
+- Bug fix.
+- Readme update.
+
+## [1.1.0] - 2026-10-28
 - Laravel 11, 12 and 13 support added.
 - PHPUnit 10, 11 and 12 support for tests; test methods now use `#[Test]` attributes alongside the `@test` annotations.
 - Fixed `LogicException` on recent Laravel versions caused by instantiating the model while it was being booted in `HasSoftCascade::bootHasSoftCascade`.
@@ -13,11 +23,3 @@ All notable changes to this project will be documented in this file.
 - Fixed `deleteModelRelationRecord()`, which read the delete method as a property instead of calling it, so it never deleted anything.
 - Fixed a `TypeError` when `cascadable()` configures only `delete` or only `restore`. The missing action no longer cascades, as the README describes.
 - Documented that `belongsToMany` relations cascade to the related models and leave the pivot rows untouched.
-
-
-## [1.0.0] - 2021-10-13
-- Initial release
-
-## [1.0.1] - 2021-10-14
-- Bug fix.
-- Readme update.

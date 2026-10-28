@@ -257,4 +257,30 @@ class SoftCascadeTest extends TestCase
         $this->assertIsObject(Profile::withTrashed()->find($profile->id));
     }
 
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_restores_without_cascading_when_only_delete_cascade_is_configured()
+    {
+
+        User::$cascadeConfig = [
+            'delete' => ['relations' => ['profile']],
+        ];
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+
+        $user->delete();
+
+        $this->assertNull(Profile::find($profile->id));
+
+        $user->refresh();
+        $user->restore();
+
+        $this->assertNotNull(User::find($user->id));
+        $this->assertNull(Profile::find($profile->id));
+    }
+
 }

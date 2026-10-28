@@ -51,6 +51,14 @@ trait SoftCascadeDelete
 
         $configs = $this->cascadable();
 
+        // A config keyed by action without a 'delete' key does not cascade deletes
+        if (! array_key_exists('delete', $configs) && array_key_exists('restore', $configs)) {
+
+            $this->runCascadeDelete = false;
+
+            return;
+        }
+
         $this->runCascadeDelete = $configs['delete']['enable'] ?? true;
 
         $this->relationships = Arr::wrap($configs['delete']['relations'] ?? $configs);

@@ -34,6 +34,14 @@ trait SoftCascadeRestore
 
         $configs = $this->cascadable();
 
+        // A config keyed by action without a 'restore' key does not cascade restores
+        if (! array_key_exists('restore', $configs) && array_key_exists('delete', $configs)) {
+
+            $this->runCascadeRestore = false;
+
+            return;
+        }
+
         $this->runCascadeRestore = $configs['restore']['enable'] ?? true;
 
         $this->relationships = Arr::wrap($configs['restore']['relations'] ?? $configs);

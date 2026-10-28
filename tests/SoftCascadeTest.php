@@ -177,6 +177,43 @@ class SoftCascadeTest extends TestCase
      * @test
      */
     #[Test]
+    public function it_uses_the_action_specific_relations_for_every_delete_and_restore()
+    {
+
+        User::$cascadeConfig = [
+            'delete'  => ['relations' => ['profile', 'posts']],
+            'restore' => ['relations' => ['profile']],
+        ];
+
+        $first = User::create(['email' => 'a@m.test', 'password' => '123']);
+        $firstProfile = $first->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $firstPost = $first->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        $second = User::create(['email' => 'b@m.test', 'password' => '123']);
+        $secondProfile = $second->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $secondPost = $second->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        $first->delete();
+        $first->restore();
+        $second->delete();
+
+        // restore only cascades to the restore relations
+        $this->assertNotNull(Profile::find($firstProfile->id));
+        $this->assertNull(Post::find($firstPost->id));
+        $this->assertIsObject(Post::withTrashed()->find($firstPost->id));
+
+        // a delete after a restore still cascades to all the delete relations
+        $this->assertNull(Profile::find($secondProfile->id));
+        $this->assertNull(Post::find($secondPost->id));
+        $this->assertIsObject(Profile::withTrashed()->find($secondProfile->id));
+        $this->assertIsObject(Post::withTrashed()->find($secondPost->id));
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
     public function it_rolls_back_the_cascade_delete_when_a_relation_fails()
     {
 
@@ -255,6 +292,35 @@ class SoftCascadeTest extends TestCase
 
         $this->assertNull(Profile::find($profile->id));
         $this->assertIsObject(Profile::withTrashed()->find($profile->id));
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_cascades_belongs_to_many_to_the_related_models_and_keeps_the_pivot_rows()
+    {
+
+        User::$cascadeConfig = ['sharedPosts'];
+
+        $owner = User::create(['email' => 'owner@m.test', 'password' => '123']);
+        $post = $owner->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $user->sharedPosts()->attach($post->id);
+
+        $user->delete();
+
+        $this->assertNull(Post::find($post->id));
+        $this->assertIsObject(Post::withTrashed()->find($post->id));
+        $this->assertSame(1, DB::table('post_user')->where('user_id', $user->id)->count());
+
+        $user->refresh();
+        $user->restore();
+
+        $this->assertNotNull(Post::find($post->id));
+        $this->assertSame(1, DB::table('post_user')->where('user_id', $user->id)->count());
     }
 
 

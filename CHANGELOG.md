@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Fixed the cascade transaction being left open when a relation fails to delete or restore. The cascade now runs in `DB::transaction()`, so it is rolled back and the exception is rethrown.
 - Fixed `deleteModelRelationRecord()`, which read the delete method as a property instead of calling it, so it never deleted anything.
 - Fixed a `TypeError` when `cascadable()` configures only `delete` or only `restore`. The missing action no longer cascades, as the README describes.
+- Documented that `belongsToMany` relations cascade to the related models and leave the pivot rows untouched.
 
 
 ## [1.0.0] - 2021-10-13

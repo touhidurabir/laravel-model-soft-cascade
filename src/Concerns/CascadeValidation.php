@@ -5,8 +5,8 @@ namespace Touhidurabir\ModelSoftCascade\Concerns;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Touhidurabir\ModelSoftCascade\Exceptions\SoftCascadeException;
 
-trait CascadeValidation {
-
+trait CascadeValidation
+{
     /**
      * List of allowed events on which the Cascade bootable trait can run
      *
@@ -22,25 +22,26 @@ trait CascadeValidation {
      * Validate that the calling model is correctly setup for cascading behaviours.
      *
      * @return void
-     * 
+     *
      * @throws \Touhidurabir\ModelSoftCascade\Exceptions\SoftCascadeException
      */
-    protected function validateCascading(array $actions = ['delete', 'restore']) {
+    protected function validateCascading(array $actions = ['delete', 'restore'])
+    {
 
         $modelClass = get_class($this);
 
-        if ( ! $this->hasCascadeRelationDefined() ) {
+        if (! $this->hasCascadeRelationDefined()) {
 
             throw SoftCascadeException::relationNotDefined($modelClass, $actions);
         }
 
-        if ( ! $this->hasSoftDeletes() ) {
+        if (! $this->hasSoftDeletes()) {
 
             throw SoftCascadeException::softDeleteNotImplementedOnModel($modelClass);
         }
 
-        if ( $invalidCascadingRelationships = $this->hasInvalidRelationships($this->relationships) ) {
-            
+        if ($invalidCascadingRelationships = $this->hasInvalidRelationships($this->relationships)) {
+
             throw SoftCascadeException::invalidRelationDefined(
                 $modelClass,
                 $invalidCascadingRelationships
@@ -54,9 +55,10 @@ trait CascadeValidation {
      *
      * @return bool
      */
-    protected function hasCascadeRelationDefined() {
+    protected function hasCascadeRelationDefined()
+    {
 
-        if ( ! is_array($this->relationships) || empty($this->relationships)  ) {
+        if (! is_array($this->relationships) || empty($this->relationships)) {
 
             return false;
         }
@@ -70,7 +72,8 @@ trait CascadeValidation {
      *
      * @return bool
      */
-    protected function hasSoftDeletes() {
+    protected function hasSoftDeletes()
+    {
 
         return method_exists($this, 'runSoftDelete');
     }
@@ -85,7 +88,8 @@ trait CascadeValidation {
      * @param  array $relationships
      * @return array
      */
-    protected function hasInvalidRelationships(array $relationships = []) {
+    protected function hasInvalidRelationships(array $relationships = [])
+    {
 
         return array_filter($relationships, function ($relationship) {
             return ! method_exists($this, $relationship) || ! $this->{$relationship}() instanceof Relation;
@@ -98,20 +102,21 @@ trait CascadeValidation {
      *
      * @param  array $actions
      * @return void
-     * 
+     *
      * @throws \Touhidurabir\ModelSoftCascade\Exceptions\SoftCascadeException
      */
-    protected function validateActionEvent(array $actions = ['delete', 'restore']) {
+    protected function validateActionEvent(array $actions = ['delete', 'restore'])
+    {
 
-        foreach($actions as $action) {
+        foreach ($actions as $action) {
 
             $eventPropertyName = strtolower($action) . 'Event';
 
-            if ( ! in_array($this->{$eventPropertyName}, $this->allowedEvent[$action]) ) {
+            if (! in_array($this->{$eventPropertyName}, $this->allowedEvent[$action])) {
 
                 throw SoftCascadeException::invalidActionEvent(
-                    $action, 
-                    $this->{$eventPropertyName}, 
+                    $action,
+                    $this->{$eventPropertyName},
                     $this->allowedEvent[$action]
                 );
             }

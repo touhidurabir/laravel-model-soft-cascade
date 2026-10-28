@@ -7,58 +7,59 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 
-trait SoftCascadeDelete {
-
-	/**
+trait SoftCascadeDelete
+{
+    /**
      * Define should run cascade delete on relations
      *
      * @var bool
      */
-	protected $runCascadeDelete = true;
+    protected $runCascadeDelete = true;
 
 
-	/**
+    /**
      * Default relation delete method
      *
      * @var string
      */
-	protected $deleteMethod = 'delete';
+    protected $deleteMethod = 'delete';
 
 
-	/**
+    /**
      * Default event on which the DeleteRelations bootable trait will run
      *
      * @var string
      */
-	protected $deleteEvent = 'deleting';
+    protected $deleteEvent = 'deleting';
 
 
-	/**
+    /**
      * Determine relation force delete if model is using force delete
      *
      * @var bool
      */
-	protected $forceDeleteOnModelForceDelete = false;
-	
+    protected $forceDeleteOnModelForceDelete = false;
 
-	/**
+
+    /**
      * Load the user defined configs and list relations to be deleted
      *
      * @return void
      */
-	private function initDelatebaleRelations() {
+    private function initDelatebaleRelations()
+    {
 
-		$configs = $this->cascadable();
+        $configs = $this->cascadable();
 
-		$this->runCascadeDelete = $configs['delete']['enable'] ?? true;
+        $this->runCascadeDelete = $configs['delete']['enable'] ?? true;
 
-		$this->relationships = Arr::wrap($configs['delete']['relations'] ?? $configs);
+        $this->relationships = Arr::wrap($configs['delete']['relations'] ?? $configs);
 
-		$this->forceDeleteOnModelForceDelete = $configs['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
-	}
+        $this->forceDeleteOnModelForceDelete = $configs['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
+    }
 
 
-	/**
+    /**
      * Delete model relations
      *
      * @param  array  $relations
@@ -67,51 +68,53 @@ trait SoftCascadeDelete {
      *
      * @return $this
      */
-	public function deleteModelRelations(array $relations = [], string $deleteMethod = 'delete', ?Model $model = null) {
+    public function deleteModelRelations(array $relations = [], string $deleteMethod = 'delete', ?Model $model = null)
+    {
 
-		$model = $model ?? $this;
+        $model = $model ?? $this;
 
-		if ( $this->runAsDatabaseTransaction ) {
+        if ($this->runAsDatabaseTransaction) {
 
-			DB::beginTransaction();
-		}
+            DB::beginTransaction();
+        }
 
-		foreach ($relations as $deleteRelation) {
+        foreach ($relations as $deleteRelation) {
 
-			if ( $model->{$deleteRelation} ) {
+            if ($model->{$deleteRelation}) {
 
-				$modelRels = $model->{$deleteRelation};
+                $modelRels = $model->{$deleteRelation};
 
-				if ( $modelRels instanceof Collection ) {
-					
-					foreach ($modelRels as $modelRel) {
+                if ($modelRels instanceof Collection) {
 
-						if ( $modelRel instanceof Model ) {
+                    foreach ($modelRels as $modelRel) {
 
-							$modelRel->{$deleteMethod}();	
-						}
-					}
+                        if ($modelRel instanceof Model) {
 
-					continue;
-				} 
+                            $modelRel->{$deleteMethod}();
+                        }
+                    }
 
-				if ( $modelRels instanceof Model ) {
+                    continue;
+                }
 
-					$modelRels->{$deleteMethod}();
-				}
-			}
-		}
+                if ($modelRels instanceof Model) {
 
-		if ( $this->runAsDatabaseTransaction ) {
-			
-			DB::commit();
-		}
+                    $modelRels->{$deleteMethod}();
+                }
+            }
+        }
 
-		return $model;
-	}
+        if ($this->runAsDatabaseTransaction) {
+
+            DB::commit();
+        }
+
+        return $model;
+    }
 
 
-    public function deleteModelRelationRecord(Model $relationModel, string $deleteMethod) {
+    public function deleteModelRelationRecord(Model $relationModel, string $deleteMethod)
+    {
 
         return $relationModel->pivot ? $relationModel->pivot->{$deleteMethod} : $relationModel->{$deleteMethod};
     }

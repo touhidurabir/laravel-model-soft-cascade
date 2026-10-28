@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
-class User extends Model {
-
+class User extends Model
+{
     use SoftDeletes;
 
     use HasSoftCascade;
 
-    public function cascadable() : array {
+    public function cascadable(): array
+    {
 
         return [
             'profile', 'posts'
@@ -33,14 +34,15 @@ class User extends Model {
      * @var array
      */
     protected $guarded = [];
-    
+
 
     /**
      * Get the profile record associated with the user.
-     * 
+     *
      * @return object
      */
-    public function profile() {
+    public function profile()
+    {
 
         return $this->hasOne('Touhidurabir\ModelSoftCascade\Tests\App\Profile');
     }
@@ -48,10 +50,11 @@ class User extends Model {
 
     /**
      * Get all the posts record associated with the user.
-     * 
+     *
      * @return object
      */
-    public function posts() {
+    public function posts()
+    {
 
         return $this->hasMany('Touhidurabir\ModelSoftCascade\Tests\App\Post');
     }
@@ -59,10 +62,11 @@ class User extends Model {
 
     /**
      * Get all the comments record associated with the user.
-     * 
+     *
      * @return object
      */
-    public function comments() {
+    public function comments()
+    {
 
         return $this->hasMany('Touhidurabir\ModelSoftCascade\Tests\App\Comment');
     }
@@ -70,10 +74,11 @@ class User extends Model {
 
     /**
      * Get all the addresses record associated with the user.
-     * 
+     *
      * @return object
      */
-    public function addresses() {
+    public function addresses()
+    {
 
         return $this->hasMany('Touhidurabir\ModelSoftCascade\Tests\App\Address');
     }
@@ -81,10 +86,11 @@ class User extends Model {
 
     /**
      * Get all the shared[many to many relation based] posts for this user
-     * 
+     *
      * @return object
      */
-    public function sharedPosts() {
+    public function sharedPosts()
+    {
 
         return $this->belongsToMany('Touhidurabir\ModelSoftCascade\Tests\App\Post', 'post_user', 'user_id', 'post_id');
     }

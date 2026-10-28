@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
-class Post extends Model {
-
+class Post extends Model
+{
     use SoftDeletes;
 
     use HasSoftCascade;
@@ -18,7 +18,8 @@ class Post extends Model {
      *
      * @return array
      */
-    public function cascadable() : array  {
+    public function cascadable(): array
+    {
 
         return [
             'delete' => [
@@ -32,7 +33,7 @@ class Post extends Model {
             ]
         ];
     }
-    
+
 
     /**
      * The model associated table
@@ -55,7 +56,8 @@ class Post extends Model {
      *
      * @return object
      */
-    public function user() {
+    public function user()
+    {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\User');
     }
@@ -66,7 +68,8 @@ class Post extends Model {
      *
      * @return object
      */
-    public function comments() {
+    public function comments()
+    {
 
         return $this->hasMany('Touhidurabir\ModelSoftCascade\Tests\App\Comment');
     }
@@ -74,10 +77,11 @@ class Post extends Model {
 
     /**
      * Get all the shared[many to many relation based] users associated with this posts
-     * 
+     *
      * @return object
      */
-    public function sharedUsers() {
+    public function sharedUsers()
+    {
 
         return $this->belongsToMany('Touhidurabir\ModelSoftCascade\Tests\App\User', 'post_user', 'post_id', 'user_id');
     }

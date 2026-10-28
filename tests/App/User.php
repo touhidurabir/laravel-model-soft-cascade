@@ -12,10 +12,17 @@ class User extends Model
 
     use HasSoftCascade;
 
+    /**
+     * Test-only override for the cascade configuration. Reset it after each test.
+     *
+     * @var array|null
+     */
+    public static $cascadeConfig = null;
+
     public function cascadable(): array
     {
 
-        return [
+        return static::$cascadeConfig ?? [
             'profile', 'posts'
         ];
     }

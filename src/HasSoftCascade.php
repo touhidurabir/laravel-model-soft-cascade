@@ -67,13 +67,14 @@ trait HasSoftCascade
 
             $self->validateCascading(['delete']);
 
-            // if model is force deleting and at model configuration onforceDelete set to true
-            if ($model->isForceDeleting() && $self->forceDeleteOnModelForceDelete) {
+            // Resolve the method per call. $self is shared by every model of this
+            // class, so storing it there would leak a force delete into later
+            // soft deletes.
+            $deleteMethod = ($model->isForceDeleting() && $self->forceDeleteOnModelForceDelete)
+                ? 'forceDelete'
+                : $self->deleteMethod;
 
-                $self->deleteMethod = 'forceDelete';
-            }
-
-            $self->deleteModelRelations($self->relationships, $self->deleteMethod, $model);
+            $self->deleteModelRelations($self->relationships, $deleteMethod, $model);
         });
 
         static::{$self->restoreEvent}(function ($model) use ($self) {

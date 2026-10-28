@@ -15,6 +15,33 @@ class SoftCascadeTest extends TestCase
     use LaravelTestBootstrapping;
 
     /**
+     * Setup the test environment.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+
+        User::$cascadeConfig = null;
+
+        parent::setUp();
+    }
+
+
+    /**
+     * Clean up the testing environment before the next test.
+     *
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+
+        User::$cascadeConfig = null;
+
+        parent::tearDown();
+    }
+
+    /**
      * Define database migrations.
      *
      * @return void
@@ -116,6 +143,31 @@ class SoftCascadeTest extends TestCase
         $this->assertNotNull(User::find($user->id));
         $this->assertNotNull(Post::find($post->id));
         $this->assertNotNull(Comment::find($comment->id));
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_does_not_leak_force_delete_into_later_soft_deletes()
+    {
+
+        $forceDeletedUser = User::create(['email' => 'a@m.test', 'password' => '123']);
+        $forceDeletedUser->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+
+        $user = User::create(['email' => 'b@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $post = $user->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        $forceDeletedUser->forceDelete();
+        $user->delete();
+
+        $this->assertIsObject(User::withTrashed()->find($user->id));
+        $this->assertIsObject(Profile::withTrashed()->find($profile->id));
+        $this->assertIsObject(Post::withTrashed()->find($post->id));
+        $this->assertTrue(Profile::withTrashed()->find($profile->id)->trashed());
+        $this->assertTrue(Post::withTrashed()->find($post->id)->trashed());
     }
 
 }

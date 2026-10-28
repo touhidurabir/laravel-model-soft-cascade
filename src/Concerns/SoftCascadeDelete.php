@@ -73,41 +73,37 @@ trait SoftCascadeDelete
 
         $model = $model ?? $this;
 
-        if ($this->runAsDatabaseTransaction) {
+        $cascade = function () use ($relations, $deleteMethod, $model) {
 
-            DB::beginTransaction();
-        }
+            foreach ($relations as $deleteRelation) {
 
-        foreach ($relations as $deleteRelation) {
+                if ($model->{$deleteRelation}) {
 
-            if ($model->{$deleteRelation}) {
+                    $modelRels = $model->{$deleteRelation};
 
-                $modelRels = $model->{$deleteRelation};
+                    if ($modelRels instanceof Collection) {
 
-                if ($modelRels instanceof Collection) {
+                        foreach ($modelRels as $modelRel) {
 
-                    foreach ($modelRels as $modelRel) {
+                            if ($modelRel instanceof Model) {
 
-                        if ($modelRel instanceof Model) {
-
-                            $modelRel->{$deleteMethod}();
+                                $modelRel->{$deleteMethod}();
+                            }
                         }
+
+                        continue;
                     }
 
-                    continue;
-                }
+                    if ($modelRels instanceof Model) {
 
-                if ($modelRels instanceof Model) {
-
-                    $modelRels->{$deleteMethod}();
+                        $modelRels->{$deleteMethod}();
+                    }
                 }
             }
-        }
+        };
 
-        if ($this->runAsDatabaseTransaction) {
-
-            DB::commit();
-        }
+        // DB::transaction() rolls back and rethrows if the cascade fails part way
+        $this->runAsDatabaseTransaction ? DB::transaction($cascade) : $cascade();
 
         return $model;
     }

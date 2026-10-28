@@ -53,32 +53,28 @@ trait SoftCascadeRestore
 
         $model = $model ?? $this;
 
-        if ($this->runAsDatabaseTransaction) {
+        $cascade = function () use ($relations, $model) {
 
-            DB::beginTransaction();
-        }
+            foreach ($relations as $restoreRelation) {
 
-        foreach ($relations as $restoreRelation) {
+                if ($model->{$restoreRelation}()->withTrashed()->count() > 0) {
 
-            if ($model->{$restoreRelation}()->withTrashed()->count() > 0) {
+                    $modelRels = $model->{$restoreRelation}()->withTrashed()->get();
 
-                $modelRels = $model->{$restoreRelation}()->withTrashed()->get();
+                    foreach ($modelRels as $modelRel) {
 
-                foreach ($modelRels as $modelRel) {
+                        ! ($modelRel instanceof Model) ?: $modelRel->restore();
+                    }
 
-                    ! ($modelRel instanceof Model) ?: $modelRel->restore();
+                    // $model->{$restoreRelation}()->withTrashed()->restore();
                 }
 
-                // $model->{$restoreRelation}()->withTrashed()->restore();
+                // !$model->{$restoreRelation} ?: $model->{$restoreRelation}()->withTrashed()->restore();
             }
+        };
 
-            // !$model->{$restoreRelation} ?: $model->{$restoreRelation}()->withTrashed()->restore();
-        }
-
-        if ($this->runAsDatabaseTransaction) {
-
-            DB::commit();
-        }
+        // DB::transaction() rolls back and rethrows if the cascade fails part way
+        $this->runAsDatabaseTransaction ? DB::transaction($cascade) : $cascade();
 
         return $model;
     }

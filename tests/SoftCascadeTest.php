@@ -2,6 +2,8 @@
 
 namespace Touhidurabir\ModelSoftCascade\Tests;
 
+use RuntimeException;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Touhidurabir\ModelSoftCascade\Tests\App\User;
@@ -168,6 +170,67 @@ class SoftCascadeTest extends TestCase
         $this->assertIsObject(Post::withTrashed()->find($post->id));
         $this->assertTrue(Profile::withTrashed()->find($profile->id)->trashed());
         $this->assertTrue(Post::withTrashed()->find($post->id)->trashed());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_rolls_back_the_cascade_delete_when_a_relation_fails()
+    {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $post = $user->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        Post::deleting(function () {
+            throw new RuntimeException('Post delete failed');
+        });
+
+        try {
+            $user->delete();
+            $this->fail('The cascade delete exception was not rethrown.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Post delete failed', $exception->getMessage());
+        }
+
+        $this->assertSame(0, DB::transactionLevel());
+        $this->assertNotNull(User::find($user->id));
+        $this->assertNotNull(Profile::find($profile->id));
+        $this->assertNotNull(Post::find($post->id));
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_rolls_back_the_cascade_restore_when_a_relation_fails()
+    {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $post = $user->posts()->create(['title' => 'post title', 'body' => 'post body']);
+
+        $user->delete();
+        $user->refresh();
+
+        Post::restoring(function () {
+            throw new RuntimeException('Post restore failed');
+        });
+
+        try {
+            $user->restore();
+            $this->fail('The cascade restore exception was not rethrown.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Post restore failed', $exception->getMessage());
+        }
+
+        $this->assertSame(0, DB::transactionLevel());
+        $this->assertNull(User::find($user->id));
+        $this->assertNull(Profile::find($profile->id));
+        $this->assertNull(Post::find($post->id));
     }
 
 }

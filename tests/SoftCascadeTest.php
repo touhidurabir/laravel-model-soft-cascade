@@ -233,4 +233,28 @@ class SoftCascadeTest extends TestCase
         $this->assertNull(Post::find($post->id));
     }
 
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_deletes_the_pivot_record_or_the_model_with_delete_model_relation_record()
+    {
+
+        $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
+        $profile = $user->profile()->create(['first_name' => 'first', 'last_name' => 'last']);
+        $post = $user->posts()->create(['title' => 'post title', 'body' => 'post body']);
+        $user->sharedPosts()->attach($post->id);
+
+        $user->deleteModelRelationRecord($user->sharedPosts()->first(), 'delete');
+
+        $this->assertSame(0, DB::table('post_user')->count());
+        $this->assertNotNull(Post::find($post->id));
+
+        $user->deleteModelRelationRecord($profile, 'delete');
+
+        $this->assertNull(Profile::find($profile->id));
+        $this->assertIsObject(Profile::withTrashed()->find($profile->id));
+    }
+
 }

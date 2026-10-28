@@ -109,9 +109,17 @@ trait SoftCascadeDelete
     }
 
 
+    /**
+     * Delete a relation record, or its pivot record when it was loaded through a pivot relation
+     *
+     * @param  Model  $relationModel
+     * @param  string $deleteMethod
+     *
+     * @return mixed
+     */
     public function deleteModelRelationRecord(Model $relationModel, string $deleteMethod)
     {
 
-        return $relationModel->pivot ? $relationModel->pivot->{$deleteMethod} : $relationModel->{$deleteMethod};
+        return $relationModel->pivot ? $relationModel->pivot->{$deleteMethod}() : $relationModel->{$deleteMethod}();
     }
 }

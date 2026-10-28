@@ -67,7 +67,7 @@ trait SoftCascadeDelete {
      *
      * @return $this
      */
-	public function deleteModelRelations(array $relations = [], string $deleteMethod = 'delete', Model $model = null) {
+	public function deleteModelRelations(array $relations = [], string $deleteMethod = 'delete', ?Model $model = null) {
 
 		$model = $model ?? $this;
 

@@ -48,7 +48,7 @@ trait SoftCascadeRestore {
      *
      * @return $this
      */
-	protected function restoreModelRelations(array $relations = [], Model $model = null) {
+	protected function restoreModelRelations(array $relations = [], ?Model $model = null) {
 
 		$model = $model ?? $this;
 

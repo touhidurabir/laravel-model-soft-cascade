@@ -2,6 +2,7 @@
 
 namespace Touhidurabir\ModelSoftCascade;
 
+use ReflectionClass;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
@@ -46,7 +47,9 @@ trait HasSoftCascade {
      */
     public static function bootHasSoftCascade() {
 
-        $self = new self;
+        // Instantiate without the constructor, as newer Laravel versions forbid
+        // constructing a model while it is still being booted.
+        $self = (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
 
 		$self->initializeHasSoftCascade();
 

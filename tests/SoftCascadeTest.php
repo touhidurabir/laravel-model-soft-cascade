@@ -2,6 +2,7 @@
 
 namespace Touhidurabir\ModelSoftCascade\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Touhidurabir\ModelSoftCascade\Tests\App\User;
 use Touhidurabir\ModelSoftCascade\Tests\App\Post;
@@ -34,6 +35,7 @@ class SoftCascadeTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_cascade_delete() {
 
         $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
@@ -52,6 +54,7 @@ class SoftCascadeTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_cascade_restore() {
 
         $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
@@ -69,6 +72,7 @@ class SoftCascadeTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_cascade_force_delete_on_parent_force_delete() {
 
         $user = User::create(['email' => 'mail@m.test', 'password' => '123']);
@@ -86,6 +90,7 @@ class SoftCascadeTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_works_on_chain_cascading() {
 
         $user = User::create(['email' => 'mail@m.test', 'password' => '123']);

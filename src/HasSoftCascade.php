@@ -2,16 +2,17 @@
 
 namespace Touhidurabir\ModelSoftCascade;
 
-use Illuminate\Support\Arr;
+use ReflectionClass;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Touhidurabir\ModelSoftCascade\Concerns\CascadeValidation;
 use Touhidurabir\ModelSoftCascade\Concerns\SoftCascadeDelete;
 use Touhidurabir\ModelSoftCascade\Concerns\SoftCascadeRestore;
 
-trait HasSoftCascade {
-
-    use SoftCascadeDelete, SoftCascadeRestore;
+trait HasSoftCascade
+{
+    use SoftCascadeDelete;
+    use SoftCascadeRestore;
 
     use CascadeValidation;
 
@@ -36,65 +37,70 @@ trait HasSoftCascade {
      *
      * @return array
      */
-    abstract public function cascadable() : array;
+    abstract public function cascadable(): array;
 
 
-    /** 
+    /**
      * Run cascading action[delete, restore]
      *
      * @return void
      */
-    public static function bootHasSoftCascade() {
+    public static function bootHasSoftCascade()
+    {
 
-        $self = new self;
+        // Instantiate without the constructor, as newer Laravel versions forbid
+        // constructing a model while it is still being booted.
+        $self = (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
 
-		$self->initializeHasSoftCascade();
+        $self->initializeHasSoftCascade();
 
         $self->validateActionEvent();
 
-		static::{$self->deleteEvent}(function ($model) use ($self) {
+        static::{$self->deleteEvent}(function ($model) use ($self) {
 
             $self->initDelatebaleRelations();
 
-            if ( ! $self->shouldRunCascade('delete') ) {
+            if (! $self->shouldRunCascade('delete')) {
 
                 return;
             }
 
             $self->validateCascading(['delete']);
 
-			// if model is force deleting and at model configuration onforceDelete set to true
-			if ( $model->isForceDeleting() && $self->forceDeleteOnModelForceDelete ) {
+            // Resolve the method per call. $self is shared by every model of this
+            // class, so storing it there would leak a force delete into later
+            // soft deletes.
+            $deleteMethod = ($model->isForceDeleting() && $self->forceDeleteOnModelForceDelete)
+                ? 'forceDelete'
+                : $self->deleteMethod;
 
-				$self->deleteMethod = 'forceDelete';
-			}
-
-			$self->deleteModelRelations($self->relationships, $self->deleteMethod, $model);
-		});
+            $self->deleteModelRelations($self->relationships, $deleteMethod, $model);
+        });
 
         static::{$self->restoreEvent}(function ($model) use ($self) {
 
             $self->initRestorableRelations();
 
-            if ( ! $self->shouldRunCascade('restore') ) {
+            if (! $self->shouldRunCascade('restore')) {
 
                 return;
             }
 
             $self->validateCascading(['restore']);
 
-			$self->restoreModelRelations($self->relationships, $model);
-			
-		});
+            $self->restoreModelRelations($self->relationships, $model);
+
+        });
     }
 
 
-    /** 
+    /**
      * Init/Set cascading action[delete, restore] specific configurations
      *
      * @return void
      */
-    public function initializeHasSoftCascade() {
+    public function initializeHasSoftCascade()
+    {
 
         $configs = $this->cascadable();
 
@@ -105,16 +111,17 @@ trait HasSoftCascade {
     }
 
 
-    /** 
+    /**
      * Should run relation cascading for specific action[delete, restore]
      *
      * @return void
      */
-    protected function shouldRunCascade(string $action) {
+    protected function shouldRunCascade(string $action)
+    {
 
         $actionBasedShouldRunProperty = 'runCascade' . ucfirst(strtolower($action));
 
-        if ( ! property_exists($this, $actionBasedShouldRunProperty) ) {
+        if (! property_exists($this, $actionBasedShouldRunProperty)) {
 
             return true;
         }

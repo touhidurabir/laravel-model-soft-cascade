@@ -4,10 +4,9 @@ namespace Touhidurabir\ModelSoftCascade\Tests\App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
-class Comment extends Model {
-
+class Comment extends Model
+{
     use SoftDeletes;
 
     /**
@@ -31,7 +30,8 @@ class Comment extends Model {
      *
      * @return object
      */
-    public function user() {
+    public function user()
+    {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\User');
     }
@@ -42,7 +42,8 @@ class Comment extends Model {
      *
      * @return object
      */
-    public function post() {
+    public function post()
+    {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\Post');
     }

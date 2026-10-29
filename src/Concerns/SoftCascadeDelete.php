@@ -7,58 +7,67 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 
-trait SoftCascadeDelete {
-
-	/**
+trait SoftCascadeDelete
+{
+    /**
      * Define should run cascade delete on relations
      *
      * @var bool
      */
-	protected $runCascadeDelete = true;
+    protected $runCascadeDelete = true;
 
 
-	/**
+    /**
      * Default relation delete method
      *
      * @var string
      */
-	protected $deleteMethod = 'delete';
+    protected $deleteMethod = 'delete';
 
 
-	/**
+    /**
      * Default event on which the DeleteRelations bootable trait will run
      *
      * @var string
      */
-	protected $deleteEvent = 'deleting';
+    protected $deleteEvent = 'deleting';
 
 
-	/**
+    /**
      * Determine relation force delete if model is using force delete
      *
      * @var bool
      */
-	protected $forceDeleteOnModelForceDelete = false;
-	
+    protected $forceDeleteOnModelForceDelete = false;
 
-	/**
+
+    /**
      * Load the user defined configs and list relations to be deleted
      *
      * @return void
      */
-	private function initDelatebaleRelations() {
+    private function initDelatebaleRelations()
+    {
 
-		$configs = $this->cascadable();
+        $configs = $this->cascadable();
 
-		$this->runCascadeDelete = $configs['delete']['enable'] ?? true;
+        // A config keyed by action without a 'delete' key does not cascade deletes
+        if (! array_key_exists('delete', $configs) && array_key_exists('restore', $configs)) {
 
-		$this->relationships = Arr::wrap($configs['delete']['relations'] ?? $configs);
+            $this->runCascadeDelete = false;
 
-		$this->forceDeleteOnModelForceDelete = $configs['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
-	}
+            return;
+        }
+
+        $this->runCascadeDelete = $configs['delete']['enable'] ?? true;
+
+        $this->relationships = Arr::wrap($configs['delete']['relations'] ?? $configs);
+
+        $this->forceDeleteOnModelForceDelete = $configs['delete']['force'] ?? config('soft-cascade.force_delete_on_model_force_delete');
+    }
 
 
-	/**
+    /**
      * Delete model relations
      *
      * @param  array  $relations
@@ -67,52 +76,58 @@ trait SoftCascadeDelete {
      *
      * @return $this
      */
-	public function deleteModelRelations(array $relations = [], string $deleteMethod = 'delete', Model $model = null) {
+    public function deleteModelRelations(array $relations = [], string $deleteMethod = 'delete', ?Model $model = null)
+    {
 
-		$model = $model ?? $this;
+        $model = $model ?? $this;
 
-		if ( $this->runAsDatabaseTransaction ) {
+        $cascade = function () use ($relations, $deleteMethod, $model) {
 
-			DB::beginTransaction();
-		}
+            foreach ($relations as $deleteRelation) {
 
-		foreach ($relations as $deleteRelation) {
+                if ($model->{$deleteRelation}) {
 
-			if ( $model->{$deleteRelation} ) {
+                    $modelRels = $model->{$deleteRelation};
 
-				$modelRels = $model->{$deleteRelation};
+                    if ($modelRels instanceof Collection) {
 
-				if ( $modelRels instanceof Collection ) {
-					
-					foreach ($modelRels as $modelRel) {
+                        foreach ($modelRels as $modelRel) {
 
-						if ( $modelRel instanceof Model ) {
+                            if ($modelRel instanceof Model) {
 
-							$modelRel->{$deleteMethod}();	
-						}
-					}
+                                $modelRel->{$deleteMethod}();
+                            }
+                        }
 
-					continue;
-				} 
+                        continue;
+                    }
 
-				if ( $modelRels instanceof Model ) {
+                    if ($modelRels instanceof Model) {
 
-					$modelRels->{$deleteMethod}();
-				}
-			}
-		}
+                        $modelRels->{$deleteMethod}();
+                    }
+                }
+            }
+        };
 
-		if ( $this->runAsDatabaseTransaction ) {
-			
-			DB::commit();
-		}
+        // DB::transaction() rolls back and rethrows if the cascade fails part way
+        $this->runAsDatabaseTransaction ? DB::transaction($cascade) : $cascade();
 
-		return $model;
-	}
+        return $model;
+    }
 
 
-    public function deleteModelRelationRecord(Model $relationModel, string $deleteMethod) {
+    /**
+     * Delete a relation record, or its pivot record when it was loaded through a pivot relation
+     *
+     * @param  Model  $relationModel
+     * @param  string $deleteMethod
+     *
+     * @return mixed
+     */
+    public function deleteModelRelationRecord(Model $relationModel, string $deleteMethod)
+    {
 
-        return $relationModel->pivot ? $relationModel->pivot->{$deleteMethod} : $relationModel->{$deleteMethod};
+        return $relationModel->pivot ? $relationModel->pivot->{$deleteMethod}() : $relationModel->{$deleteMethod}();
     }
 }

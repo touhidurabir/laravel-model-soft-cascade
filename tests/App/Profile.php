@@ -5,8 +5,8 @@ namespace Touhidurabir\ModelSoftCascade\Tests\App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Profile extends Model {
-
+class Profile extends Model
+{
     use SoftDeletes;
 
     /**
@@ -30,7 +30,8 @@ class Profile extends Model {
      *
      * @return object
      */
-    public function user() {
+    public function user()
+    {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\User');
     }

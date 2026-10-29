@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Touhidurabir\ModelSoftCascade\HasSoftCascade;
 
-class Address extends Model {
-
+class Address extends Model
+{
     use SoftDeletes;
 
     // use HasSoftCascade;
@@ -38,7 +38,8 @@ class Address extends Model {
      *
      * @return object
      */
-    public function user() {
+    public function user()
+    {
 
         return $this->belongsTo('Touhidurabir\ModelSoftCascade\Tests\App\User');
     }

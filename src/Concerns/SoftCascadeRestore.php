@@ -5,42 +5,50 @@ namespace Touhidurabir\ModelSoftCascade\Concerns;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
 
-trait SoftCascadeRestore {
-
-	/**
+trait SoftCascadeRestore
+{
+    /**
      * Define should run cascade restore on relations
      *
      * @var bool
      */
-	protected $runCascadeRestore = true;
+    protected $runCascadeRestore = true;
 
 
-	/**
+    /**
      * Default event on which the RestoreRelations bootable trait will run
      *
      * @var string
      */
-	protected $restoreEvent = 'restoring';
+    protected $restoreEvent = 'restoring';
 
 
-	/**
+    /**
      * Load the user defined configs and list relations to be deleted
      *
      * @return void
      */
-	private function initRestorableRelations() {
+    private function initRestorableRelations()
+    {
 
-		$configs = $this->cascadable();
+        $configs = $this->cascadable();
 
-		$this->runCascadeRestore = $configs['restore']['enable'] ?? true;
+        // A config keyed by action without a 'restore' key does not cascade restores
+        if (! array_key_exists('restore', $configs) && array_key_exists('delete', $configs)) {
 
-		$this->relationships = Arr::wrap($configs['restore']['relations'] ?? $configs);
-	}
+            $this->runCascadeRestore = false;
+
+            return;
+        }
+
+        $this->runCascadeRestore = $configs['restore']['enable'] ?? true;
+
+        $this->relationships = Arr::wrap($configs['restore']['relations'] ?? $configs);
+    }
 
 
-	/**
+    /**
      * Restore model relations
      *
      * @param  array  $relations
@@ -48,38 +56,35 @@ trait SoftCascadeRestore {
      *
      * @return $this
      */
-	protected function restoreModelRelations(array $relations = [], Model $model = null) {
+    protected function restoreModelRelations(array $relations = [], ?Model $model = null)
+    {
 
-		$model = $model ?? $this;
+        $model = $model ?? $this;
 
-		if ( $this->runAsDatabaseTransaction ) {
+        $cascade = function () use ($relations, $model) {
 
-			DB::beginTransaction();
-		}
+            foreach ($relations as $restoreRelation) {
 
-		foreach ($relations as $restoreRelation) {
+                if ($model->{$restoreRelation}()->withTrashed()->count() > 0) {
 
-			if ( $model->{$restoreRelation}()->withTrashed()->count() > 0 ) {
+                    $modelRels = $model->{$restoreRelation}()->withTrashed()->get();
 
-				$modelRels = $model->{$restoreRelation}()->withTrashed()->get();
+                    foreach ($modelRels as $modelRel) {
 
-				foreach ($modelRels as $modelRel) {
-					
-					! ($modelRel instanceof Model) ?: $modelRel->restore();
-				}
-				
-				// $model->{$restoreRelation}()->withTrashed()->restore();
-			}
+                        ! ($modelRel instanceof Model) ?: $modelRel->restore();
+                    }
 
-			// !$model->{$restoreRelation} ?: $model->{$restoreRelation}()->withTrashed()->restore();
-		}
+                    // $model->{$restoreRelation}()->withTrashed()->restore();
+                }
 
-		if ( $this->runAsDatabaseTransaction ) {
+                // !$model->{$restoreRelation} ?: $model->{$restoreRelation}()->withTrashed()->restore();
+            }
+        };
 
-			DB::commit();
-		}
+        // DB::transaction() rolls back and rethrows if the cascade fails part way
+        $this->runAsDatabaseTransaction ? DB::transaction($cascade) : $cascade();
 
-		return $model;
-	}
-    
+        return $model;
+    }
+
 }

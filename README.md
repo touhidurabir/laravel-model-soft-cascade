@@ -104,6 +104,10 @@ public function cascadable() : array  {
 }
 ```
 
+### Many to many relations
+
+For a **belongsToMany** relation, the cascade applies to the **related models**, not to the pivot table rows. Deleting a user with a cascadable `sharedPosts` relation soft deletes (or force deletes) the shared posts themselves, and restoring the user restores them. The pivot rows are left untouched, so the relation is intact again after a restore. Only list a many to many relation as cascadable if the related records should really follow the parent model. On a force delete, a foreign key from the pivot table to the related table must cascade on delete, otherwise the database rejects the delete.
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
